@@ -1,0 +1,159 @@
+import java.util.*;
+
+// Enum to represent different types of rooms
+enum RoomType {
+    SINGLE, DOUBLE, SUITE
+}
+
+// Class to represent a room
+class Room {
+    private int roomNumber;
+    private RoomType type;
+    private double price;
+    private boolean isAvailable;
+
+    public Room(int roomNumber, RoomType type, double price) {
+        this.roomNumber = roomNumber;
+        this.type = type;
+        this.price = price;
+        this.isAvailable = true;
+    }
+
+    public int getRoomNumber() {
+        return roomNumber;
+    }
+
+    public RoomType getType() {
+        return type;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(boolean available) {
+        isAvailable = available;
+    }
+}
+
+// Class to represent a reservation
+class Reservation {
+    private int reservationId;
+    private Room room;
+    private Date checkInDate;
+    private Date checkOutDate;
+
+    public Reservation(int reservationId, Room room, Date checkInDate, Date checkOutDate) {
+        this.reservationId = reservationId;
+        this.room = room;
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
+    }
+
+    public int getReservationId() {
+        return reservationId;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public Date getCheckInDate() {
+        return checkInDate;
+    }
+
+    public Date getCheckOutDate() {
+        return checkOutDate;
+    }
+}
+
+// Class to represent the hotel and manage reservations
+class Hotel {
+    private List<Room> rooms;
+    private List<Reservation> reservations;
+    private int nextReservationId;
+
+    public Hotel() {
+        rooms = new ArrayList<>();
+        reservations = new ArrayList<>();
+        nextReservationId = 1;
+        // Initialize some rooms
+        rooms.add(new Room(101, RoomType.SINGLE, 50.0));
+        rooms.add(new Room(102, RoomType.SINGLE, 50.0));
+        rooms.add(new Room(201, RoomType.DOUBLE, 80.0));
+        rooms.add(new Room(202, RoomType.DOUBLE, 80.0));
+        rooms.add(new Room(301, RoomType.SUITE, 120.0));
+    }
+
+    // Method to search for available rooms of a specific type
+    public List<Room> searchAvailableRooms(RoomType type, Date checkInDate, Date checkOutDate) {
+        List<Room> availableRooms = new ArrayList<>();
+        for (Room room : rooms) {
+            if (room.getType() == type && room.isAvailable()) {
+                availableRooms.add(room);
+            }
+        }
+        return availableRooms;
+    }
+
+    // Method to make a reservation
+    public Reservation makeReservation(Room room, Date checkInDate, Date checkOutDate) {
+        if (!room.isAvailable()) {
+            return null; // Room is not available
+        }
+        Reservation reservation = new Reservation(nextReservationId++, room, checkInDate, checkOutDate);
+        room.setAvailable(false);
+        reservations.add(reservation);
+        return reservation;
+    }
+
+    // Method to get booking details
+    public Reservation getBookingDetails(int reservationId) {
+        for (Reservation reservation : reservations) {
+            if (reservation.getReservationId() == reservationId) {
+                return reservation;
+            }
+        }
+        return null; // Reservation not found
+    }
+}
+
+public class HotelReservationSystem {
+    public static void main(String[] args) {
+        Hotel hotel = new Hotel();
+
+        // Search for available rooms
+        List<Room> availableRooms = hotel.searchAvailableRooms(RoomType.SINGLE, new Date(), new Date());
+        System.out.println("Available Single Rooms:");
+        for (Room room : availableRooms) {
+            System.out.println("Room Number: " + room.getRoomNumber() + ", Price: $" + room.getPrice());
+        }
+
+        // Make a reservation
+        Room room = availableRooms.get(0); // Assuming the first available room is chosen
+        Reservation reservation = hotel.makeReservation(room, new Date(), new Date());
+        if (reservation != null) {
+            System.out.println("Reservation successful! Reservation ID: " + reservation.getReservationId());
+        } else {
+            System.out.println("Failed to make reservation. Room not available.");
+        }
+
+        // Get booking details
+        if (reservation != null) {
+            Reservation bookingDetails = hotel.getBookingDetails(reservation.getReservationId());
+            if (bookingDetails != null) {
+                System.out.println("Booking Details:");
+                System.out.println("Reservation ID: " + bookingDetails.getReservationId());
+                System.out.println("Room Number: " + bookingDetails.getRoom().getRoomNumber());
+                System.out.println("Check-in Date: " + bookingDetails.getCheckInDate());
+                System.out.println("Check-out Date: " + bookingDetails.getCheckOutDate());
+            } else {
+                System.out.println("Booking details not found.");
+            }
+        }
+    }
+}
